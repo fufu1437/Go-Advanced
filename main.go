@@ -1,44 +1,27 @@
 package main
 
 import (
-	"bufio"
-	"context"
 	"fmt"
-	"os"
-	"strconv"
-	"time"
+	"sync"
+	"sync/atomic"
 )
 
-func sumWithCtx(ctx context.Context, nums []int) (int, error) {
-	total := 0
-	for _, n := range nums {
-		// select on ctx.Done
-		select {
-		case <-ctx.Done():
-			return 0, ctx.Err()
-		default:
-			total += n
-		}
-	}
-	_ = time.Millisecond
-	return total, nil
-}
-
 func main() {
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Scan()
-	n, _ := strconv.Atoi(sc.Text())
-	nums := make([]int, n)
-	for i := 0; i < n; i++ {
-		sc.Scan()
-		nums[i], _ = strconv.Atoi(sc.Text())
+	var counter int64
+	var wg sync.WaitGroup
+	// spawn 100 goroutines
+	// each does 100 atomic.AddInt64(&counter, 1)
+	// wg.Wait()
+
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			atomic.AddInt64(&counter, 100)
+		}()
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	total, err := sumWithCtx(ctx, nums)
-	if err != nil {
-		fmt.Println("error:", err)
-	} else {
-		fmt.Println(total)
-	}
+
+	wg.Wait()
+	fmt.Println(counter)
+
 }
