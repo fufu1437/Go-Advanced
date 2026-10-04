@@ -1,24 +1,34 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
-	"reflect"
+	"os"
+	"strconv"
 )
 
-type Person struct {
-	Name string
-	Age  int
+var ErrTooSmall = errors.New("value too small")
+
+func validate(n int) error {
+	if n >= 10 {
+		return nil
+	}
+	return fmt.Errorf("validating n=%d: %w", n, ErrTooSmall)
 }
 
 func main() {
-	p := Person{Name: "Ada", Age: 36}
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Scan()
+	n, _ := strconv.Atoi(sc.Text())
 
-	v := reflect.ValueOf(p)
-	t := v.Type()
-
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i)
-		fmt.Printf("%s: %v\n", field.Name, value.Interface())
+	err := validate(n)
+	switch {
+	case err == nil:
+		fmt.Println("ok")
+	case errors.Is(err, ErrTooSmall):
+		fmt.Printf("too small: %d\n", n)
+	default:
+		fmt.Printf("error: %v\n", err)
 	}
 }
