@@ -1,34 +1,28 @@
 package main
 
-import (
-	"bufio"
-	"errors"
-	"fmt"
-	"os"
-	"strconv"
-)
+import "fmt"
 
-var ErrTooSmall = errors.New("value too small")
-
-func validate(n int) error {
-	if n >= 10 {
-		return nil
-	}
-	return fmt.Errorf("validating n=%d: %w", n, ErrTooSmall)
+func add(a, b int) int {
+	return a + b
 }
 
 func main() {
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Scan()
-	n, _ := strconv.Atoi(sc.Text())
+	cases := []struct {
+		name string
+		a, b int
+		want int
+	}{
+		{"two positives", 2, 3, 5},
+		{"with zero", 0, 7, 7},
+		{"with negative", -2, -3, -5},
+	}
 
-	err := validate(n)
-	switch {
-	case err == nil:
-		fmt.Println("ok")
-	case errors.Is(err, ErrTooSmall):
-		fmt.Printf("too small: %d\n", n)
-	default:
-		fmt.Printf("error: %v\n", err)
+	for _, c := range cases {
+		got := add(c.a, c.b)
+		if got == c.want {
+			fmt.Printf("%s: PASS\n", c.name)
+		} else {
+			fmt.Printf("%s: FAIL got=%d want=%d\n", c.name, got, c.want)
+		}
 	}
 }
