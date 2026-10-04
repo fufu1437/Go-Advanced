@@ -1,40 +1,24 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
+	"reflect"
 )
 
-// filterInts should return only the elements for which keep(v) is true,
-// keeping their original order.
-func filterInts(s []int, keep func(int) bool) []int {
-	result := []int{}
-	for _, v := range s {
-		if keep(v) {
-			result = append(result, v)
-		}
-	}
-	return result
+type Person struct {
+	Name string
+	Age  int
 }
 
 func main() {
-	sc := bufio.NewScanner(os.Stdin)
-	sc.Scan()
-	nums := []int{}
-	for _, f := range strings.Fields(sc.Text()) {
-		n, _ := strconv.Atoi(f)
-		nums = append(nums, n)
-	}
+	p := Person{Name: "Ada", Age: 36}
 
-	// 只保留偶数
-	evens := filterInts(nums, func(n int) bool { return n%2 == 0 })
+	v := reflect.ValueOf(p)
+	t := v.Type()
 
-	parts := make([]string, len(evens))
-	for i, v := range evens {
-		parts[i] = strconv.Itoa(v)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+		fmt.Printf("%s: %v\n", field.Name, value.Interface())
 	}
-	fmt.Println(strings.Join(parts, " "))
 }
